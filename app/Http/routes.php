@@ -11,6 +11,11 @@
 |
 */
 
-$app->get('/', function () use ($app) {
-    return $app->version();
+Route::group(['middleware' => 'cors'], function(Router $router){
+    $router->get('/', function () {
+        return redirect('status');
+    });
+
+    $router->get('/status', 'MainController@status');
+    $router->get('/search', 'MainController@search');
 });
