@@ -96,7 +96,7 @@ $app->configure('cors');
 |
 */
 
-$app->group(['namespace' => 'App\Http\Controllers'], function ($app) {
+$app->group(['namespace' => 'App\Http\Controllers', 'middleware' => 'cors'], function ($app) {
     require __DIR__.'/../app/Http/routes.php';
 });
 
