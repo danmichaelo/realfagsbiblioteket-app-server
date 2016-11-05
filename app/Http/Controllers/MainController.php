@@ -14,9 +14,11 @@ class MainController extends Controller
         $platformVersion = $request->input('platform_version');
         $device = $request->input('device');
 
-        app('db')->insert('INSERT INTO status (app_version, platform, platform_version, device) VALUES (?, ?, ?, ?)',
-            [$appVersion, $platform, $platformVersion, $device]
-        );
+        if (!is_null($device)) {
+            app('db')->insert('INSERT INTO app_events (app_version, platform, platform_version, device, event_type, event_time) VALUES (?, ?, ?, ?, ?, current_timestamp)',
+                [$appVersion, $platform, $platformVersion, $device, 'status']
+            );
+        }
 
         return response()->json([
             'status' => 'ok'
@@ -38,8 +40,8 @@ class MainController extends Controller
         $material = $request->input('material', 'print-books,books');
 
         if (!is_null($device)) {
-            app('db')->insert('INSERT INTO search (app_version, platform, platform_version, device, query) VALUES (?, ?, ?, ?, ?)',
-                [$appVersion, $platform, $platformVersion, $device, $query]
+            app('db')->insert('INSERT INTO app_events (app_version, platform, platform_version, device, event_type, event_time, event_data) VALUES (?, ?, ?, ?, ?, current_timestamp, ?)',
+                [$appVersion, $platform, $platformVersion, $device, 'search', json_encode(['query' => $query])]
             );
         }
 
