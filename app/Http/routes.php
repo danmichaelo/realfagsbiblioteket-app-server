@@ -11,9 +11,5 @@
 |
 */
 
-$app->get('/', function () {
-    return redirect('status');
-});
-
-$app->get('/status', 'MainController@status');
-$app->get('/search', 'MainController@search');
+$app->get('/realfagsbiblioteket-app/status', 'MainController@status');
+$app->get('/realfagsbiblioteket-app/search', 'MainController@search');
