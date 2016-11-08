@@ -21,7 +21,7 @@ class CreateEventsTable extends Migration
             $table->text('device');
             $table->text('event_type');
             $table->dateTime('event_time');
-            $table->text('event_data')->nullable();
+            $table->jsonb('event_data')->nullable();
         });
     }
 
