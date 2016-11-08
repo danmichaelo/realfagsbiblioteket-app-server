@@ -80,4 +80,20 @@ class MainController extends Controller
         return response($res->getBody(), 200)
             ->header('Content-Type', 'application/json');
     }
+
+    public function xisbn(Request $request, Http $http, $isbn)
+    {
+        $res = $http->request('GET', 'http://xisbn.worldcat.org/webservices/xid/isbn/' . $isbn, [
+            'query' => [
+                'method' => 'getMetadata',
+                'format' => 'json',
+                'fl' => '*',
+            ]
+        ]);
+
+        $this->trackEvent('xisbn', $request);
+
+        return response($res->getBody(), 200)
+            ->header('Content-Type', 'application/json');
+    }
 }

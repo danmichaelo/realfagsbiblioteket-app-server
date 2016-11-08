@@ -18,3 +18,4 @@ $app->get('/realfagsbiblioteket-app/status', 'MainController@status');
 $app->get('/realfagsbiblioteket-app/search', 'MainController@search');
 $app->get('/realfagsbiblioteket-app/groups/{id}', 'MainController@group');
 $app->get('/realfagsbiblioteket-app/records/{id}', 'MainController@record');
+$app->get('/realfagsbiblioteket-app/xisbn/{isbn}', 'MainController@xisbn');
