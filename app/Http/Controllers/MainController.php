@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 class MainController extends Controller
 {
 
-    protected function trackEvent($eventType, Request $request, $data)
+    protected function trackEvent($eventType, Request $request, $data = null)
     {
         $appVersion = $request->input('app_version');
         $platform = $request->input('platform');
@@ -24,7 +24,7 @@ class MainController extends Controller
 
     public function status(Request $request)
     {
-        $this->trackEvent('status', $request, null);
+        $this->trackEvent('status', $request);
 
         return response()->json([
             'status' => 'ok'
@@ -53,7 +53,7 @@ class MainController extends Controller
 
         $json = json_decode($res->getBody());
 
-        $this->trackEvent('status', $request, [
+        $this->trackEvent('search', $request, [
             'query' => $query,
             'total_results' => $json->total_results,
         ]);
@@ -75,7 +75,7 @@ class MainController extends Controller
     {
         $res = $http->request('GET', 'https://lsm.biblionaut.net/primo/records/' . $id);
 
-        $this->trackEvent('record', $request, ['id' => $id]);
+        $this->trackEvent('record', $request);
 
         return response($res->getBody(), 200)
             ->header('Content-Type', 'application/json');
