@@ -12,7 +12,7 @@
 */
 
 $app->get('/realfagsbiblioteket-app/', function() {
-	return redirect()->action('MainController@status');
+	return redirect('status');
 });
 $app->get('/realfagsbiblioteket-app/status', 'MainController@status');
 $app->get('/realfagsbiblioteket-app/search', 'MainController@search');
