@@ -39,8 +39,9 @@ class MainController extends Controller
         $library = $request->input('library', 'ubo1030310,ubo1030317,ubo1030500');
         $sort = $request->input('sort', 'date');
         $material = $request->input('material', 'print-books,books');
+        $scope = $request->input('scope', 'UBO');
 
-        $res = $http->request('GET', 'https://lsm.biblionaut.net/primo/search', [
+        $res = $http->request('GET', 'https://ub-lsm.uio.no/primo/search', [
             'query' => [
                 'query' => $query,
                 'start' => $start,
@@ -63,7 +64,7 @@ class MainController extends Controller
 
     public function group(Request $request, Http $http, $id)
     {
-        $res = $http->request('GET', 'https://lsm.biblionaut.net/primo/groups/' . $id);
+        $res = $http->request('GET', 'https://ub-lsm.uio.no/primo/groups/' . $id);
 
         $this->trackEvent('group', $request, ['id' => $id]);
 
@@ -73,7 +74,7 @@ class MainController extends Controller
 
     public function record(Request $request, Http $http, $id)
     {
-        $res = $http->request('GET', 'https://lsm.biblionaut.net/primo/records/' . $id);
+        $res = $http->request('GET', 'https://ub-lsm.uio.no/primo/records/' . $id);
 
         $this->trackEvent('record', $request);
 
