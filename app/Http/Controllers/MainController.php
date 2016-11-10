@@ -64,7 +64,13 @@ class MainController extends Controller
 
     public function group(Request $request, Http $http, $id)
     {
-        $res = $http->request('GET', 'https://ub-lsm.uio.no/primo/groups/' . $id);
+        $institution = $request->input('institution', 'UBO');
+
+        $res = $http->request('GET', 'https://ub-lsm.uio.no/primo/groups/' . $id, [
+            'query' => [
+                'institution' => $institution,
+            ],
+        ]);
 
         $this->trackEvent('group', $request, ['id' => $id]);
 
