@@ -42,6 +42,8 @@ class MainController extends Controller
         $scope = $request->input('scope', 'UBO');
         $raw = $request->input('raw');
 
+        $t0 = microtime(true);
+
         $res = $http->request('GET', 'https://ub-lsm.uio.no/primo/search', [
             'query' => [
                 'query' => $query,
@@ -61,10 +63,16 @@ class MainController extends Controller
 
         $body = json_decode($res->getBody());
 
+        $t1 = microtime(true) - $t0;
+        $t1 = round($t1 * 1000);
+
         $this->trackEvent('search', $request, [
             'query' => $query,
-            'total_results' => $json->total_results,
+            'total_results' => $body->total_results,
+            'msecs' => $t1,
         ]);
+
+        $body->msecs = $t1;
 
         return response()->json($body);
     }
