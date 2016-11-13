@@ -40,6 +40,7 @@ class MainController extends Controller
         $sort = $request->input('sort', 'date');
         $material = $request->input('material', 'print-books,books');
         $scope = $request->input('scope', 'UBO');
+        $raw = $request->input('raw');
 
         $res = $http->request('GET', 'https://ub-lsm.uio.no/primo/search', [
             'query' => [
@@ -49,17 +50,22 @@ class MainController extends Controller
                 'library' => $library,
                 'sort' => $sort,
                 'material' => $material,
+                'raw' => $raw,
             ]
         ]);
 
-        $json = json_decode($res->getBody());
+        if ($raw) {
+            echo $res->getBody();die;
+        }
+
+        $body = json_decode($res->getBody());
 
         $this->trackEvent('search', $request, [
             'query' => $query,
             'total_results' => $json->total_results,
         ]);
 
-        return response()->json($json);
+        return response()->json($body);
     }
 
     public function group(Request $request, Http $http, $id)
