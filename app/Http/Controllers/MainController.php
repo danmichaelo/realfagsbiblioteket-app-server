@@ -47,6 +47,7 @@ class MainController extends Controller
                 'query' => $query,
                 'start' => $start,
                 'institution' => $institution,
+                'scope' => $scope,
                 'library' => $library,
                 'sort' => $sort,
                 'material' => $material,
@@ -75,6 +76,7 @@ class MainController extends Controller
         $res = $http->request('GET', 'https://ub-lsm.uio.no/primo/groups/' . $id, [
             'query' => [
                 'institution' => $institution,
+                'scope' => $institution,
             ],
         ]);
 
