@@ -25,7 +25,9 @@ class MainController extends Controller
 
     public function status(Request $request)
     {
-        $this->trackEvent('status', $request);
+        $this->trackEvent('status', $request, [
+            'language' => $request->input('language'),
+        ]);
 
         return response()->json([
             'status' => 'ok'
