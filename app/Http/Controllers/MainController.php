@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use GuzzleHttp\Client as Http;
 use Illuminate\Http\Request;
+use App\Record;
 
 class MainController extends Controller
 {
@@ -41,6 +42,8 @@ class MainController extends Controller
         $material = $request->input('material', 'print-books,books');
         $scope = $request->input('scope', 'UBO');
         $raw = $request->input('raw');
+        $repr = $request->input('repr', 'full');
+        $apiVersion = intval($request->input('apiVersion', '1'));
 
         $t0 = microtime(true);
 
@@ -54,6 +57,7 @@ class MainController extends Controller
                 'sort' => $sort,
                 'material' => $material,
                 'raw' => $raw,
+                'repr' => $repr,
             ]
         ]);
 
@@ -62,6 +66,9 @@ class MainController extends Controller
         }
 
         $body = json_decode($res->getBody());
+        foreach ($body->results as $record) {
+            Record::process($record, $apiVersion);
+        }
 
         $t1 = microtime(true) - $t0;
         $t1 = round($t1 * 1000);
@@ -80,6 +87,7 @@ class MainController extends Controller
     public function group(Request $request, Http $http, $id)
     {
         $institution = $request->input('institution', 'UBO');
+        $apiVersion = intval($request->input('apiVersion', '1'));
 
         $res = $http->request('GET', 'https://ub-lsm.uio.no/primo/groups/' . $id, [
             'query' => [
@@ -87,21 +95,27 @@ class MainController extends Controller
                 'scope' => $institution,
             ],
         ]);
+        $body = json_decode($res->getBody());
+        foreach ($body->result->records as $record) {
+            Record::process($record, $apiVersion);
+        }
 
         $this->trackEvent('group', $request, ['id' => $id]);
 
-        return response($res->getBody(), 200)
-            ->header('Content-Type', 'application/json');
+        return response()->json($body);
     }
 
     public function record(Request $request, Http $http, $id)
     {
         $res = $http->request('GET', 'https://ub-lsm.uio.no/primo/records/' . $id);
+        $apiVersion = intval($request->input('apiVersion', '1'));
+
+        $body = json_decode($res->getBody());
+        Record::process($body->result, $apiVersion);
 
         $this->trackEvent('record', $request);
 
-        return response($res->getBody(), 200)
-            ->header('Content-Type', 'application/json');
+        return response()->json($body);
     }
 
     public function xisbn(Request $request, Http $http, $isbn)
