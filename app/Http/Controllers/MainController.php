@@ -38,11 +38,28 @@ class MainController extends Controller
     {
         $query = $request->input('query');
         $start = $request->input('start', 1);
-        $institution = $request->input('institution', 'UBO');
-        $library = $request->input('library', 'ubo1030310,ubo1030317,ubo1030500');
+
+        $scope = null;
+        $institution = null;
+        $library = null;
+        switch ($request->input('scope')) {
+            case 'BIBSYS':
+                $scope = 'BIBSYS_ILS';
+                break;
+
+            case 'UBO':
+                $scope = 'UBO';
+                $institution = 'UBO';
+                break;
+
+            default:
+                $scope = 'UBO';
+                $institution = 'UBO';
+                $library = 'ubo1030310,ubo1030317,ubo1030500';
+        }
+
         $sort = $request->input('sort', 'date');
-        $material = $request->input('material', 'print-books,books');
-        $scope = $request->input('scope', 'UBO');
+        $material = $request->input('material', 'print-books');
         $raw = $request->input('raw');
         $repr = $request->input('repr', 'full');
         $apiVersion = intval($request->input('apiVersion', '1'));
