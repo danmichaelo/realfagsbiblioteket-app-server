@@ -56,14 +56,16 @@ class Record
         }
 
         // Simplify since we don't have deduplication enabled
+        $record->holdings = [];
         if (isset($record->components)) {
             $record->holdings = $record->components[0]->holdings;
             $record->category = $record->components[0]->category;
             $record->alma_id = $record->components[0]->alma_id;
             unset($record->components);
+
+            $record->holdings = Holdings::process($record->holdings);
         }
 
-        $record->holdings = Holdings::process($record->holdings);
     }
     /**
      * Reduce material type from array to string

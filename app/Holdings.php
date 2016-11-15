@@ -38,31 +38,31 @@ class Holdings
         ],
 
         // HumSam
-        'UBO1030300' => ['zone' => 'other', 'name' => 'HumSam-biblioteket'],
-        'UBO1030303' => ['zone' => 'other', 'name' => 'Studentbiblioteket Sophus Bugge'],
-        'UBO1030301' => ['zone' => 'other', 'name' => 'Teologisk bibliotek'],
+        'UBO1030300' => ['zone' => 'ubo', 'name' => 'HumSam-biblioteket'],
+        'UBO1030303' => ['zone' => 'ubo', 'name' => 'Studentbiblioteket Sophus Bugge'],
+        'UBO1030301' => ['zone' => 'ubo', 'name' => 'Teologisk bibliotek'],
 
         // Kulturhistorisk museum
-        'UBO1030011' => ['zone' => 'other', 'name' => 'Arkeologisk bibliotek'],
-        'UBO1030010' => ['zone' => 'other', 'name' => 'Etnografisk bibliotek'],
-        'UBO1030012' => ['zone' => 'other', 'name' => 'Numismatisk bibliotek'],
+        'UBO1030011' => ['zone' => 'ubo', 'name' => 'Arkeologisk bibliotek'],
+        'UBO1030010' => ['zone' => 'ubo', 'name' => 'Etnografisk bibliotek'],
+        'UBO1030012' => ['zone' => 'ubo', 'name' => 'Numismatisk bibliotek'],
 
         // Medisin og ontologi
-        'UBO1032300' => ['zone' => 'other', 'name' => 'Medisinsk bibliotek (Rikshospitalet)'],
-        'UBO1032500' => ['zone' => 'other', 'name' => 'Medisinsk bibliotek (Radiumhospitalet)'],
-        'UBO1030338' => ['zone' => 'other', 'name' => 'Medisinsk bibliotek (Ullevål)'],
-        'UBO1030307' => ['zone' => 'other', 'name' => 'Odontologisk bibliotek'],
+        'UBO1032300' => ['zone' => 'ubo', 'name' => 'Medisinsk bibliotek (Rikshospitalet)'],
+        'UBO1032500' => ['zone' => 'ubo', 'name' => 'Medisinsk bibliotek (Radiumhospitalet)'],
+        'UBO1030338' => ['zone' => 'ubo', 'name' => 'Medisinsk bibliotek (Ullevål)'],
+        'UBO1030307' => ['zone' => 'ubo', 'name' => 'Odontologisk bibliotek'],
 
         // Juridisk
-        'UBO1030000' => ['zone' => 'other', 'name' => 'Juridisk bibliotek'],
-        'UBO1030001' => ['zone' => 'other', 'name' => 'Juridisk bibliotek : Privatrett'],
-        'UBO1030002' => ['zone' => 'other', 'name' => 'Juridisk bibliotek : Kriminologi og rettssosiologi'],
-        'UBO1030003' => ['zone' => 'other', 'name' => 'Juridisk bibliotek : Offentlig rett'],
-        'UBO1030004' => ['zone' => 'other', 'name' => 'Juridisk bibliotek : Rettsinformatikk'],
-        'UBO1030005' => ['zone' => 'other', 'name' => 'Juridisk bibliotek : Petroleumsrett og europarett'],
-        'UBO1030006' => ['zone' => 'other', 'name' => 'Juridisk bibliotek : Sjørett'],
-        'UBO1030009' => ['zone' => 'other', 'name' => 'Juridisk bibliotek : Læringssenteret'],
-        'UBO1030015' => ['zone' => 'other', 'name' => 'Juridisk bibliotek : Rettshistorisk samling'],
+        'UBO1030000' => ['zone' => 'ubo', 'name' => 'Juridisk bibliotek'],
+        'UBO1030001' => ['zone' => 'ubo', 'name' => 'Juridisk bibliotek : Privatrett'],
+        'UBO1030002' => ['zone' => 'ubo', 'name' => 'Juridisk bibliotek : Kriminologi og rettssosiologi'],
+        'UBO1030003' => ['zone' => 'ubo', 'name' => 'Juridisk bibliotek : Offentlig rett'],
+        'UBO1030004' => ['zone' => 'ubo', 'name' => 'Juridisk bibliotek : Rettsinformatikk'],
+        'UBO1030005' => ['zone' => 'ubo', 'name' => 'Juridisk bibliotek : Petroleumsrett og europarett'],
+        'UBO1030006' => ['zone' => 'ubo', 'name' => 'Juridisk bibliotek : Sjørett'],
+        'UBO1030009' => ['zone' => 'ubo', 'name' => 'Juridisk bibliotek : Læringssenteret'],
+        'UBO1030015' => ['zone' => 'ubo', 'name' => 'Juridisk bibliotek : Rettshistorisk samling'],
     ];
 
     static public function process($holdings)
@@ -71,10 +71,8 @@ class Holdings
 
         // Enrich
         foreach ($holdings as $holding) {
-            if (!isset(self::$libraries[$holding->library])) {
-                continue;
-            }
-            $lib = self::$libraries[$holding->library];
+
+            $lib = isset(self::$libraries[$holding->library]) ? self::$libraries[$holding->library] : [];
             $cols = array_get($lib, 'collections', []);
 
             $holding->closed_stack = (
@@ -83,17 +81,32 @@ class Holdings
             );
 
             $holding->library_name = array_get($lib, 'name', $holding->library);
-            $holding->library_zone = array_get($lib, 'zone');
+            $holding->library_zone = array_get($lib, 'zone', 'other');
         }
 
         return $holdings;
+    }
+
+    static public function getBestHolding($holdings)
+    {
+        usort($holdings, function($a, $b) {
+
+            // Men merk at NB ikke har callcode på sine fjernlånseks.
+            // Så litt usikker på  denne
+            // Eks.: https://ub-lsm.uio.no/primo/records/BIBSYS_ILS71478038780002201?raw=true
+            $points = (intval(isset($b->callcode))) - (intval(isset($a->callcode)));
+
+            return $points;
+        });
+
+        return $holdings[0];
     }
 
     static public function filter($record_holdings)
     {
         $selectedHoldings = [];
 
-        $codes = ['local' => [], 'satellite' => [], 'other' => []];
+        $codes = ['local' => [], 'satellite' => [], 'ubo' => [], 'other' => ['*']];
         $holdings = [];
         $availableHoldings = [];
 
@@ -101,12 +114,18 @@ class Holdings
             $codes[$v['zone']][] = $k;
         }
 
-        foreach (array_keys($codes) as $zone) {
-
-            $holdings[$zone] = array_values(array_filter($record_holdings, function($holding) use ($codes, $zone) {
-                return in_array($holding->library, $codes[$zone]);
-            }));
-
+        foreach ($codes as $zone => $zv) {
+            $holdings[$zone] = [];
+        }
+        foreach ($record_holdings as $holding) {
+           foreach ($codes as $zone => $zv) {
+                if (in_array($holding->library, $zv) || in_array('*', $zv)) {
+                    $holdings[$zone][] = $holding;
+                    break; // break out of the zone loop to avoid the record going into the '*' zone
+                }
+            }
+        }
+        foreach ($codes as $zone => $zv) {
             $availableHoldings[$zone] = array_values(array_filter($holdings[$zone], function($holding) {
                 return $holding->status == 'available';
             }));
@@ -121,40 +140,51 @@ class Holdings
 
         if (count($availableHoldings['local'])) {
             // Available at local library!
-            $selectedHoldings[] = $availableHoldings['local'][0];
+            $selectedHoldings[] = self::getBestHolding($availableHoldings['local']);
 
             return $selectedHoldings;
 
         } else if (count($holdings['local'])) {
             // On loan at local library : Add, but do not return
-            $selectedHoldings[] = $holdings['local'][0];
+            $selectedHoldings[] = self::getBestHolding($holdings['local']);
         }
 
         if (count($availableHoldings['satellite'])) {
             // Available at satellite library
-            $selectedHoldings[] = $availableHoldings['satellite'][0];
+            $selectedHoldings[] = self::getBestHolding($availableHoldings['satellite']);
 
             return $selectedHoldings;
         }
 
-        if (count($availableHoldings['other'])) {
-            // Available at other library
-            $selectedHoldings[] = $availableHoldings['other'][0];
+        if (count($availableHoldings['ubo'])) {
+            // Available at other ubo library
+            $selectedHoldings[] = self::getBestHolding($availableHoldings['ubo']);
 
             return $selectedHoldings;
-
         }
 
         if (!count($selectedHoldings) && count($holdings['satellite'])) {
             // On loan at satellite library
-            $selectedHoldings[] = $holdings['satellite'][0];
+            $selectedHoldings[] = self::getBestHolding($holdings['satellite']);
+
+            return $selectedHoldings;
+        }
+
+        if (!count($selectedHoldings) && count($holdings['ubo'])) {
+            // On loan at other ubo library
+            $selectedHoldings[] = self::getBestHolding($holdings['ubo']);
+
+            return $selectedHoldings;
+        }
+
+        if (!count($selectedHoldings) && count($availableHoldings['other'])) {
+            $selectedHoldings[] = self::getBestHolding($availableHoldings['other']);
 
             return $selectedHoldings;
         }
 
         if (!count($selectedHoldings) && count($holdings['other'])) {
-            // On loan at other library
-            $selectedHoldings[] = $holdings['other'][0];
+            $selectedHoldings[] = self::getBestHolding($holdings['other']);
 
             return $selectedHoldings;
         }
