@@ -66,6 +66,16 @@ class Record
             $record->holdings = Holdings::process($record->holdings);
         }
 
+        $urls = [];
+        foreach ($record->urls as $urlObj) {
+            if ($urlObj->type == 'Alma-E' && in_array('UBO', $urlObj->access)) {
+                $urls[] = $urlObj;
+            } else if ($urlObj->type != 'Alma-E'){
+                $urls[] = $urlObj;
+            }
+        }
+
+        $record->urls = $urls;
     }
     /**
      * Reduce material type from array to string
