@@ -34,11 +34,8 @@ class MainController extends Controller
         ]);
     }
 
-    public function search(Request $request, Http $http)
+    public function getScope(Request $request)
     {
-        $query = $request->input('query');
-        $start = $request->input('start', 1);
-
         $scope = null;
         $institution = null;
         $library = null;
@@ -57,7 +54,15 @@ class MainController extends Controller
                 $institution = 'UBO';
                 $library = 'ubo1030310,ubo1030317,ubo1030500';
         }
+        return [$scope, $institution, $library];
+    }
 
+    public function search(Request $request, Http $http)
+    {
+        $query = $request->input('query');
+        list($scope, $institution, $library) = $this->getScope($request);
+
+        $start = $request->input('start', 1);
         $sort = $request->input('sort', 'date');
         $material = $request->input('material', 'print-books');
         $raw = $request->input('raw');
@@ -70,8 +75,8 @@ class MainController extends Controller
             'query' => [
                 'query' => $query,
                 'start' => $start,
-                'institution' => $institution,
                 'scope' => $scope,
+                'institution' => $institution,
                 'library' => $library,
                 'sort' => $sort,
                 'material' => $material,
@@ -105,13 +110,13 @@ class MainController extends Controller
 
     public function group(Request $request, Http $http, $id)
     {
-        $institution = $request->input('institution', 'UBO');
+        list($scope, $institution, $library) = $this->getScope($request);
         $apiVersion = intval($request->input('apiVersion', '1'));
 
         $res = $http->request('GET', 'https://ub-lsm.uio.no/primo/groups/' . $id, [
             'query' => [
+                'scope' => $scope,
                 'institution' => $institution,
-                'scope' => $institution,
             ],
         ]);
         $body = json_decode($res->getBody());
