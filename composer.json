@@ -9,7 +9,8 @@
         "laravel/lumen-framework": "5.3.*",
         "vlucas/phpdotenv": "~2.2",
         "barryvdh/laravel-cors": "^0.8.2",
-        "guzzlehttp/guzzle": "^6.2"
+        "guzzlehttp/guzzle": "^6.2",
+        "rap2hpoutre/laravel-log-viewer": "~0.7"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",

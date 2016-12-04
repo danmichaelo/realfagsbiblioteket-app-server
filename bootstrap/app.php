@@ -8,6 +8,10 @@ try {
     //
 }
 
+// Make log files group writable
+umask(0002);
+
+
 /*
 |--------------------------------------------------------------------------
 | Create The Application
@@ -23,9 +27,18 @@ $app = new Laravel\Lumen\Application(
     realpath(__DIR__.'/../')
 );
 
-// $app->withFacades();
+$app->withFacades();
 
-// $app->withEloquent();
+
+$app->configureMonologUsing(function($monolog) {
+    $maxFiles = 30;
+
+    $handler = new Monolog\Handler\RotatingFileHandler(storage_path('logs/lumen.log'), $maxFiles);
+    $handler->setFormatter(new Monolog\Formatter\LineFormatter(null, null, true, true));
+    $monolog->setHandlers([$handler]);
+
+    return $monolog;
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -82,6 +95,7 @@ $app->singleton(
 // $app->register(App\Providers\AuthServiceProvider::class);
 // $app->register(App\Providers\EventServiceProvider::class);
 $app->register(Barryvdh\Cors\LumenServiceProvider::class);
+$app->register(Rap2hpoutre\LaravelLogViewer\LaravelLogViewerServiceProvider::class);
 
 $app->configure('cors');
 
@@ -98,6 +112,10 @@ $app->configure('cors');
 
 $app->group(['namespace' => 'App\Http\Controllers', 'middleware' => 'cors'], function ($app) {
     require __DIR__.'/../app/Http/routes.php';
+});
+
+$app->group(['namespace' => '\Rap2hpoutre\LaravelLogViewer'], function() use ($app) {
+    $app->get('/realfagsbiblioteket-app/logs', 'LogViewerController@index');
 });
 
 return $app;
