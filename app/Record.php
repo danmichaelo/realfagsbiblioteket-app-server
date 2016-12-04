@@ -68,9 +68,11 @@ class Record
 
         $urls = [];
         foreach ($record->urls as $urlObj) {
-            if ($urlObj->type == 'Alma-E' && in_array('UBO', $urlObj->access)) {
-                $urls[] = $urlObj;
-            } else if ($urlObj->type != 'Alma-E'){
+            if (in_array($urlObj->type, ['Alma-E', 'Alma-D'])) {
+                if (in_array('UBO', $urlObj->access)) {
+                    $urls[] = $urlObj;
+                }
+            } else {
                 $urls[] = $urlObj;
             }
         }
