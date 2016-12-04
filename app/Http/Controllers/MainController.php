@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use GuzzleHttp\Client as Http;
+use GuzzleHttp\Exception\ClientException;
+
 use Illuminate\Http\Request;
 use App\Record;
 
@@ -71,19 +73,32 @@ class MainController extends Controller
 
         $t0 = microtime(true);
 
-        $res = $http->request('GET', 'https://ub-lsm.uio.no/primo/search', [
-            'query' => [
-                'query' => $query,
-                'start' => $start,
-                'scope' => $scope,
-                'institution' => $institution,
-                'library' => $library,
-                'sort' => $sort,
-                'material' => $material,
-                'raw' => $raw,
-                'repr' => $repr,
-            ]
-        ]);
+        try {
+            $res = $http->request('GET', 'https://ub-lsm.uio.no/primo/search', [
+                'query' => [
+                    'query' => $query,
+                    'start' => $start,
+                    'scope' => $scope,
+                    'institution' => $institution,
+                    'library' => $library,
+                    'sort' => $sort,
+                    'material' => $material,
+                    'raw' => $raw,
+                    'repr' => $repr,
+                ]
+            ]);
+        } catch (ClientException $e) {
+            \Log::error("Server error from https://ub-lsm.uio.no/primo/search\n\n" . \GuzzleHttp\Psr7\str($e->getRequest()) . "\n" . \GuzzleHttp\Psr7\str($e->getResponse()));
+            if ($e->hasResponse()) {
+                $json = json_decode($e->getResponse()->getBody());
+                $error = $json->error;
+            } else {
+                $error = $e->getMessage();
+            }
+            return response()->json([
+                'error' => $error,
+            ], 400);
+        }
 
         if ($raw) {
             echo $res->getBody();die;
