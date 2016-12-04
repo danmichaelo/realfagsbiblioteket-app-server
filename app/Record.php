@@ -60,7 +60,7 @@ class Record
         if (isset($record->components)) {
             $record->holdings = $record->components[0]->holdings;
             $record->category = $record->components[0]->category;
-            $record->alma_id = $record->components[0]->alma_id;
+            $record->alma_id = $record->alma_id;
             unset($record->components);
 
             $record->holdings = Holdings::process($record->holdings);
