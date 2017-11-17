@@ -13,8 +13,14 @@ class Holdings
                 // sorted in order of increasing preference
                 //('Pensum' is less preferred than the rest)
                 '-----',   // (no match)
-                'k00471',  // UREAL Pensum         [least preferred]
+                'k60011',  // UREAL Pensum (Dagslån)        [least preferred]
+                'k00471',  // UREAL Pensum
                 'k00460',  // UREAL Laveregrad
+                'k00469',  // UREAL Oppsl.
+                'k00418',  // UREAL Avis
+                'k00480',  // UREAL Skranken
+                'k00593',  // UREAL Avsamling
+                'k00481',  // UREAL Spill Bjørnehjørnet
                 'k00413',  // UREAL Astr.
                 'k00421',  // UREAL Biol.
                 'k00447',  // UREAL Geo.
@@ -25,6 +31,7 @@ class Holdings
                 'k00465',  // UREAL Mat.
                 'k00475',  // UREAL Samling 42
                 'k00477',  // UREAL SciFi
+                'k00416',  // UREAL Atlas
                 'k00423',  // UREAL Boksamling    [most preferred]
             ],
         ],
