@@ -2,11 +2,9 @@
 
 require_once __DIR__.'/../vendor/autoload.php';
 
-try {
-    (new Dotenv\Dotenv(__DIR__.'/../'))->load();
-} catch (Dotenv\Exception\InvalidPathException $e) {
-    //
-}
+(new Laravel\Lumen\Bootstrap\LoadEnvironmentVariables(
+    dirname(__DIR__)
+))->bootstrap();
 
 // Make log files group writable
 umask(0002);
@@ -24,21 +22,11 @@ umask(0002);
 */
 
 $app = new Laravel\Lumen\Application(
-    realpath(__DIR__.'/../')
+    dirname(__DIR__)
 );
 
 $app->withFacades();
 
-
-$app->configureMonologUsing(function($monolog) {
-    $maxFiles = 30;
-
-    $handler = new Monolog\Handler\RotatingFileHandler(storage_path('logs/lumen.log'), $maxFiles);
-    $handler->setFormatter(new Monolog\Formatter\LineFormatter(null, null, true, true));
-    $monolog->setHandlers([$handler]);
-
-    return $monolog;
-});
 
 /*
 |--------------------------------------------------------------------------
@@ -94,7 +82,7 @@ $app->singleton(
 // $app->register(App\Providers\AppServiceProvider::class);
 // $app->register(App\Providers\AuthServiceProvider::class);
 // $app->register(App\Providers\EventServiceProvider::class);
-$app->register(Barryvdh\Cors\LumenServiceProvider::class);
+$app->register(Barryvdh\Cors\ServiceProvider::class);
 $app->register(Rap2hpoutre\LaravelLogViewer\LaravelLogViewerServiceProvider::class);
 
 $app->configure('cors');
@@ -110,12 +98,15 @@ $app->configure('cors');
 |
 */
 
-$app->group(['namespace' => 'App\Http\Controllers', 'middleware' => 'cors'], function ($app) {
-    require __DIR__.'/../app/Http/routes.php';
+$app->router->group([
+    'namespace' => 'App\Http\Controllers',
+    'middleware' => \Barryvdh\Cors\HandleCors::class,
+], function ($router) {
+    require __DIR__.'/../routes/web.php';
 });
 
-$app->group(['namespace' => '\Rap2hpoutre\LaravelLogViewer'], function() use ($app) {
-    $app->get('/realfagsbiblioteket-app/logs', 'LogViewerController@index');
+$app->router->group(['namespace' => '\Rap2hpoutre\LaravelLogViewer'], function($router) {
+    $router->get('/realfagsbiblioteket-app/logs', 'LogViewerController@index');
 });
 
 return $app;
