@@ -11,12 +11,12 @@
 |
 */
 
-$router->get('/realfagsbiblioteket-app/', function() {
+$router->get('/', function() {
 	return redirect('status');
 });
-$router->get('/realfagsbiblioteket-app/status', 'MainController@status');
-$router->get('/realfagsbiblioteket-app/search', 'MainController@search');
-$router->get('/realfagsbiblioteket-app/groups/{id}', 'MainController@group');
-$router->get('/realfagsbiblioteket-app/records/{id}', 'MainController@record');
-$router->get('/realfagsbiblioteket-app/xisbn/{isbn}', 'MainController@xisbn');
+$router->get('/status', 'MainController@status');
+$router->get('/search', 'MainController@search');
+$router->get('/groups/{id}', 'MainController@group');
+$router->get('/records/{id}', 'MainController@record');
+$router->get('/xisbn/{isbn}', 'MainController@xisbn');
 
