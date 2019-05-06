@@ -6,6 +6,8 @@ require_once __DIR__.'/../vendor/autoload.php';
     dirname(__DIR__)
 ))->bootstrap();
 
+Sentry\init(['dsn' => env('SENTRY_DSN') ]);
+
 // Make log files group writable
 umask(0002);
 

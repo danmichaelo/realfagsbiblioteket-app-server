@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\SearchFailed;
 use GuzzleHttp\Client as Http;
 use GuzzleHttp\Exception\ClientException;
 
@@ -88,15 +89,20 @@ class MainController extends Controller
                 ]
             ]);
         } catch (ClientException $e) {
-            \Log::error("Server error from https://ub-lsm.uio.no/primo/search\n\n" . \GuzzleHttp\Psr7\str($e->getRequest()) . "\n" . \GuzzleHttp\Psr7\str($e->getResponse()));
+            $details = "Server error from https://ub-lsm.uio.no/primo/search\n\n" . \GuzzleHttp\Psr7\str($e->getRequest()) . "\n" . \GuzzleHttp\Psr7\str($e->getResponse());
+            \Log::error($details);
+
+            $errorMsg = $e->getMessage();
+
             if ($e->hasResponse()) {
                 $json = json_decode($e->getResponse()->getBody());
-                $error = $json->error;
-            } else {
-                $error = $e->getMessage();
+                $errorMsg = $json->error;
             }
+
+            \Sentry\captureException(new SearchFailed($errorMsg, 0, $e));
+
             return response()->json([
-                'error' => $error,
+                'error' => $errorMsg,
             ], 400);
         }
 
