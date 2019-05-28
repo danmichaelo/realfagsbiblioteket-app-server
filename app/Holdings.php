@@ -25,7 +25,6 @@ class Holdings
                 'k00421',  // UREAL Biol.
                 'k00447',  // UREAL Geo.
                 'k00449',  // UREAL Geol.
-                'k00426',  // UREAL Farm.
                 'k00457',  // UREAL Kjem.
                 'k00440',  // UREAL Fys.
                 'k00465',  // UREAL Mat.
